@@ -17,7 +17,7 @@ fn get_client() -> Client {
     let agent = format!("{}/{}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"));
     Client::builder().user_agent(agent).build().unwrap()
 }
-
+// Function to scrape website.
 #[tokio::main]
 async fn main() {
     // Define client for web request.
@@ -47,13 +47,20 @@ async fn main() {
     // Iterate through site elements and isolate title and web address.
     for element in document.select(&article_selector) {
         let title = element.inner_html().trim().to_string();
-        let href = element.value().attr("href").unwrap_or("no url found").to_string();
+        let href = element
+            .value()
+            .attr("href")
+            .unwrap_or("no url found")
+            .to_string();
 
         // Uncomment to print results to screen.
         // println!("Title: {:?}\nLINK: {}", title, href);
 
         // Push contents from scrape to Vec using defined Struct.
-        article_list.push(ArticleContent { article_title: title, url_link: href });
+        article_list.push(ArticleContent {
+            article_title: title,
+            url_link: href,
+        });
     }
     // Print number of articles scraped.
     println!("Number of articles scraped: {}", article_list.len());
@@ -69,7 +76,12 @@ fn save_article_list(article_list: &[ArticleContent], domain_name: &str) {
     // Define filename.
     let filename = format!("{}_{}.json", domain_name, dtl.format("%Y-%m-%d_%H.%M"));
     let mut writer = File::create(&filename).unwrap();
-    write!(&mut writer, "{}", &serde_json::to_string(article_list).unwrap()).unwrap();
+    write!(
+        &mut writer,
+        "{}",
+        &serde_json::to_string(article_list).unwrap()
+    )
+    .unwrap();
 }
 
 // Function to write raw website results to an HTML file.
